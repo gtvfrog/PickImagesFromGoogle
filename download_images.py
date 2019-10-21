@@ -1,14 +1,15 @@
-# USAGE
+# Uso
 # python download_images.py --urls urls.txt --output Imagens/PapaiNoel
 
-# import the necessary packages
+# Importar os pacotes necessários
 from imutils import paths
 import argparse
 import requests
 import cv2
 import os
 
-# construct the argument parse and parse the arguments
+# Pega os argumentos da chamada do comando
+# Analisa os argumentos e valida
 ap = argparse.ArgumentParser()
 ap.add_argument("-u", "--urls", required=True,
 	help="path to file containing image URLs")
@@ -16,54 +17,54 @@ ap.add_argument("-o", "--output", required=True,
 	help="path to output directory of images")
 args = vars(ap.parse_args())
 
-# grab the list of URLs from the input file, then initialize the
-# total number of images downloaded thus far
+# Pega as linhas da lista de URLs do arquivo de entrada e inicaliza
 rows = open(args["urls"]).read().strip().split("\n")
+# total = número total de imagens baixadas
 total = 0
 
-# loop the URLs
+# loop URLs
 for url in rows:
 	try:
-		# try to download the image
+		#Tenta baixar a imagem
 		r = requests.get(url, timeout=60)
 
-		# save the image to disk
+		#Salva a imagem no disco
 		p = os.path.sep.join([args["output"], "{}.jpg".format(
 			str(total).zfill(8))])
 		f = open(p, "wb")
 		f.write(r.content)
 		f.close()
 
-		# update the counter
+		# Atualiza o contador
 		print("[INFO] downloaded: {}".format(p))
 		total += 1
 
-	# handle if any exceptions are thrown during the download process
+	#Manipula se deu algo errado durante o processo de download
 	except:
 		print("[INFO] error downloading {}...skipping".format(p))
 
-# loop over the image paths we just downloaded
+# Loop nas imagens para ver se tem arquivo corrompido
 for imagePath in paths.list_images(args["output"]):
-	# initialize if the image should be deleted or not
+	# Auxiliar para deletar ou não a imagem
 	delete = False
 
-	# try to load the image
+	# Tenta carregar a imagem
 	try:
 		image = cv2.imread(imagePath)
 
-		# if the image is `None` then we could not properly load it
-		# from disk, so delete it
+		#Se a imagem for "None", não é possivel carregá-la
+		#Então deleta
 		if image is None:
 			print("None")
 			delete = True
 
-	# if OpenCV cannot load the image then the image is likely
-	# corrupt so we should delete it
+	#Se o OpenCV não puder carregar a imagem
+	#É que pode estar corrompida então, deleta
 	except:
 		print("Except")
 		delete = True
 
-	# check to see if the image should be deleted
+	# Checa se a imagem deve ser excluida
 	if delete:
 		print("[INFO] deleting {}".format(imagePath))
 		os.remove(imagePath)
